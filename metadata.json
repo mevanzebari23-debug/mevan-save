@@ -1,0 +1,6 @@
+{
+  "name": "Capital & Debt Tracker",
+  "description": "Comprehensive capital, cash flow, investment tracker with partner vehicle co-ownership, car maintenance & services spending (oil changes, polishing), debt loans, biometric security, and cloud backup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

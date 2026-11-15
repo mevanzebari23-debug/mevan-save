@@ -1,0 +1,249 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User financial summary, portfolio metadata and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique user ID matching auth.uid" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "updatedAtMillis": { "type": "number", "description": "Timestamp in milliseconds" },
+        "recordCount": { "type": "number", "description": "Total synced records count" },
+        "startingCapital": { "type": "number", "description": "User base capital amount" },
+        "capitalCurrency": { "type": "string", "description": "Currency of starting capital" },
+        "displayCurrency": { "type": "string", "description": "Selected display currency" },
+        "iqdPerUsdRate": { "type": "number", "description": "USD to IQD exchange rate" },
+        "isCustomIqdRate": { "type": "boolean", "description": "Whether rate is custom" },
+        "eurPerUsdRate": { "type": "number", "description": "USD to EUR exchange rate" },
+        "biometricEnabled": { "type": "boolean", "description": "Biometric protection state" },
+        "themeMode": { "type": "string", "description": "Selected UI theme mode" },
+        "language": { "type": "string", "description": "Language code" }
+      },
+      "required": ["uid"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Income or expense record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Unique transaction id" },
+        "type": { "type": "string", "description": "IN or OUT" },
+        "amount": { "type": "number", "description": "Transaction amount" },
+        "currency": { "type": "string", "description": "Transaction currency" },
+        "category": { "type": "string", "description": "Category name" },
+        "dateMillis": { "type": "number", "description": "Transaction timestamp" },
+        "notes": { "type": "string", "description": "Transaction notes" },
+        "affectsCapital": { "type": "boolean", "description": "Impacts base capital" },
+        "exchangeRateAtEntry": { "type": "number", "description": "Rate at entry" }
+      },
+      "required": ["id", "type", "amount", "currency"]
+    },
+    "Investment": {
+      "title": "Investment",
+      "description": "Asset or business portfolio item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Investment id" },
+        "name": { "type": "string", "description": "Asset name" },
+        "category": { "type": "string", "description": "Category" },
+        "initialCapital": { "type": "number", "description": "Initial invested amount" },
+        "currentValue": { "type": "number", "description": "Current valuation" },
+        "currency": { "type": "string", "description": "Currency code" },
+        "purchaseDateMillis": { "type": "number", "description": "Purchase date" },
+        "notes": { "type": "string", "description": "Notes" },
+        "isCoOwned": { "type": "boolean", "description": "Partnership indicator" },
+        "partnerName": { "type": "string", "description": "Partner name" },
+        "myInvestmentAmount": { "type": "number", "description": "Owner share amount" },
+        "partnerInvestmentAmount": { "type": "number", "description": "Partner share amount" },
+        "isSold": { "type": "boolean", "description": "Whether asset is sold" },
+        "soldPrice": { "type": "number", "description": "Realized sale price" },
+        "deductedFromCash": { "type": "boolean", "description": "Deducted from liquid cash" },
+        "soldDateMillis": { "type": "number", "description": "Sale timestamp" },
+        "exchangeRateAtEntry": { "type": "number", "description": "Exchange rate at entry" }
+      },
+      "required": ["id", "name", "initialCapital"]
+    },
+    "GoldHolding": {
+      "title": "GoldHolding",
+      "description": "Precious metals vault holding",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Gold holding id" },
+        "metalType": { "type": "string", "description": "GOLD or SILVER" },
+        "title": { "type": "string", "description": "Holding title" },
+        "weightGrams": { "type": "number", "description": "Weight in grams" },
+        "buyPricePerGram": { "type": "number", "description": "Purchase price per gram" },
+        "currency": { "type": "string", "description": "Currency" },
+        "purchaseDateMillis": { "type": "number", "description": "Purchase timestamp" },
+        "karat": { "type": "number", "description": "Gold purity karat" },
+        "purityLabel": { "type": "string", "description": "Purity label" },
+        "notes": { "type": "string", "description": "Notes" },
+        "deductedFromCash": { "type": "boolean", "description": "Paid from cash" },
+        "isSold": { "type": "boolean", "description": "Whether sold" },
+        "soldPriceUsd": { "type": "number", "description": "Sold price" },
+        "soldDateMillis": { "type": "number", "description": "Sold date" }
+      },
+      "required": ["id", "metalType", "weightGrams", "buyPricePerGram"]
+    },
+    "DebtCredit": {
+      "title": "DebtCredit",
+      "description": "Borrowing or lending loan record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Debt or credit id" },
+        "type": { "type": "string", "description": "DEBT or CREDIT" },
+        "personName": { "type": "string", "description": "Counterparty person name" },
+        "contactInfo": { "type": "string", "description": "Contact info" },
+        "totalAmount": { "type": "number", "description": "Principal amount" },
+        "amountPaid": { "type": "number", "description": "Accumulated payments" },
+        "currency": { "type": "string", "description": "Currency" },
+        "dueDateMillis": { "type": "number", "description": "Due timestamp" },
+        "notes": { "type": "string", "description": "Notes" },
+        "reminderEnabled": { "type": "boolean", "description": "Reminder flag" },
+        "isCompleted": { "type": "boolean", "description": "Completed flag" },
+        "affectCashBalance": { "type": "boolean", "description": "Affects cash" },
+        "createdAtMillis": { "type": "number", "description": "Created timestamp" },
+        "exchangeRateAtEntry": { "type": "number", "description": "Exchange rate" },
+        "cashImpactAmount": { "type": "number", "description": "Cash impact" },
+        "cashPaidImpactAmount": { "type": "number", "description": "Paid cash impact" }
+      },
+      "required": ["id", "type", "personName", "totalAmount"]
+    },
+    "DebtPayment": {
+      "title": "DebtPayment",
+      "description": "Installment payment toward debt or credit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Payment id" },
+        "debtId": { "type": "number", "description": "Parent debt id" },
+        "amount": { "type": "number", "description": "Payment amount" },
+        "dateMillis": { "type": "number", "description": "Payment timestamp" },
+        "notes": { "type": "string", "description": "Payment note" },
+        "exchangeRateAtEntry": { "type": "number", "description": "Exchange rate" },
+        "affectCashBalance": { "type": "boolean", "description": "Affects cash" }
+      },
+      "required": ["id", "debtId", "amount"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Spending limit and threshold alert",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Budget id" },
+        "category": { "type": "string", "description": "Category name" },
+        "monthlyLimit": { "type": "number", "description": "Monthly ceiling" },
+        "currency": { "type": "string", "description": "Currency code" },
+        "alertThresholdPercent": { "type": "number", "description": "Warning percentage" },
+        "isRecurring": { "type": "boolean", "description": "Recurring monthly" }
+      },
+      "required": ["id", "category", "monthlyLimit"]
+    },
+    "CarService": {
+      "title": "CarService",
+      "description": "Maintenance or expense record for car portfolio",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Service id" },
+        "carInvestmentId": { "type": "number", "description": "Car investment id" },
+        "carName": { "type": "string", "description": "Vehicle name" },
+        "serviceType": { "type": "string", "description": "Service type" },
+        "cost": { "type": "number", "description": "Service cost" },
+        "currency": { "type": "string", "description": "Currency" },
+        "paidBy": { "type": "string", "description": "Party who paid" },
+        "partnerName": { "type": "string", "description": "Partner name" },
+        "dateMillis": { "type": "number", "description": "Timestamp" },
+        "notes": { "type": "string", "description": "Notes" }
+      },
+      "required": ["id", "carName", "cost"]
+    },
+    "CarPayment": {
+      "title": "CarPayment",
+      "description": "Installment payment for vehicle financing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Payment id" },
+        "carId": { "type": "number", "description": "Car id" },
+        "carName": { "type": "string", "description": "Vehicle name" },
+        "amount": { "type": "number", "description": "Payment amount" },
+        "currency": { "type": "string", "description": "Currency" },
+        "paymentDateMillis": { "type": "number", "description": "Payment timestamp" },
+        "paymentMonth": { "type": "string", "description": "Month label" },
+        "paidBy": { "type": "string", "description": "Party who paid" },
+        "partnerName": { "type": "string", "description": "Partner name" },
+        "myShare": { "type": "number", "description": "My portion" },
+        "partnerShare": { "type": "number", "description": "Partner portion" },
+        "notes": { "type": "string", "description": "Notes" }
+      },
+      "required": ["id", "carName", "amount"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "User preference settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number", "description": "Settings id" },
+        "startingCapital": { "type": "number", "description": "Starting capital" },
+        "capitalCurrency": { "type": "string", "description": "Capital currency" },
+        "displayCurrency": { "type": "string", "description": "Display currency" },
+        "iqdPerUsdRate": { "type": "number", "description": "IQD rate" },
+        "isCustomIqdRate": { "type": "boolean", "description": "Is custom" },
+        "eurPerUsdRate": { "type": "number", "description": "EUR rate" },
+        "lastRateUpdateMillis": { "type": "number", "description": "Update timestamp" },
+        "biometricEnabled": { "type": "boolean", "description": "Biometrics" },
+        "themeMode": { "type": "string", "description": "Theme" },
+        "language": { "type": "string", "description": "Language" },
+        "lastCloudBackupMillis": { "type": "number", "description": "Last backup" },
+        "cloudDeviceId": { "type": "string", "description": "Device id" },
+        "capitalExchangeRateAtEntry": { "type": "number", "description": "Exchange rate" }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User portfolio master summary and account metadata"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Cash flow transactions collection"
+    },
+    "/users/{userId}/investments/{investmentId}": {
+      "schema": "Investment",
+      "description": "Assets and investment portfolios"
+    },
+    "/users/{userId}/monthly_records/{recordId}": {
+      "schema": "MonthlyRecord",
+      "description": "Monthly profit and loss tracking"
+    },
+    "/users/{userId}/gold_holdings/{holdingId}": {
+      "schema": "GoldHolding",
+      "description": "Physical gold and silver holdings"
+    },
+    "/users/{userId}/debts_credits/{debtCreditId}": {
+      "schema": "DebtCredit",
+      "description": "Debts and credit loan records"
+    },
+    "/users/{userId}/debt_payments/{paymentId}": {
+      "schema": "DebtPayment",
+      "description": "Installment history payments for debts and credits"
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Monthly spending budget thresholds"
+    },
+    "/users/{userId}/car_services/{serviceId}": {
+      "schema": "CarService",
+      "description": "Car service and maintenance records"
+    },
+    "/users/{userId}/car_payments/{paymentId}": {
+      "schema": "CarPayment",
+      "description": "Car installment and purchase payments"
+    },
+    "/users/{userId}/settings/{settingId}": {
+      "schema": "UserSettings",
+      "description": "User preferences and system rates"
+    }
+  }
+}

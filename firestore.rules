@@ -1,0 +1,272 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Security Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity validation functions
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 200)) &&
+             (!('updatedAtMillis' in data) || data.updatedAtMillis is number) &&
+             (!('recordCount' in data) || data.recordCount is number) &&
+             (!('startingCapital' in data) || data.startingCapital is number) &&
+             (!('capitalCurrency' in data) || (data.capitalCurrency is string && data.capitalCurrency.size() <= 10)) &&
+             (!('displayCurrency' in data) || (data.displayCurrency is string && data.displayCurrency.size() <= 10)) &&
+             (!('iqdPerUsdRate' in data) || data.iqdPerUsdRate is number) &&
+             (!('isCustomIqdRate' in data) || data.isCustomIqdRate is bool) &&
+             (!('eurPerUsdRate' in data) || data.eurPerUsdRate is number) &&
+             (!('biometricEnabled' in data) || data.biometricEnabled is bool) &&
+             (!('themeMode' in data) || (data.themeMode is string && data.themeMode.size() <= 20)) &&
+             (!('language' in data) || (data.language is string && data.language.size() <= 20));
+    }
+
+    function isValidTransaction(data) {
+      return data.id is number &&
+             data.type is string && data.type.size() <= 10 &&
+             data.amount is number &&
+             data.currency is string && data.currency.size() <= 10 &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+             (!('dateMillis' in data) || data.dateMillis is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             (!('affectsCapital' in data) || data.affectsCapital is bool) &&
+             (!('exchangeRateAtEntry' in data) || data.exchangeRateAtEntry is number);
+    }
+
+    function isValidInvestment(data) {
+      return data.id is number &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.initialCapital is number &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+             (!('currentValue' in data) || data.currentValue is number) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('purchaseDateMillis' in data) || data.purchaseDateMillis is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             (!('isCoOwned' in data) || data.isCoOwned is bool) &&
+             (!('partnerName' in data) || (data.partnerName is string && data.partnerName.size() <= 200)) &&
+             (!('myInvestmentAmount' in data) || data.myInvestmentAmount is number) &&
+             (!('partnerInvestmentAmount' in data) || data.partnerInvestmentAmount is number) &&
+             (!('isSold' in data) || data.isSold is bool) &&
+             (!('soldPrice' in data) || data.soldPrice is number) &&
+             (!('deductedFromCash' in data) || data.deductedFromCash is bool) &&
+             (!('soldDateMillis' in data) || data.soldDateMillis is number) &&
+             (!('exchangeRateAtEntry' in data) || data.exchangeRateAtEntry is number);
+    }
+
+    function isValidMonthlyRecord(data) {
+      return data.id is number &&
+             data.investmentId is number &&
+             data.yearMonth is string && data.yearMonth.size() <= 20 &&
+             (!('gainLossAmount' in data) || data.gainLossAmount is number) &&
+             (!('recordedValue' in data) || data.recordedValue is number) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('timestamp' in data) || data.timestamp is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000));
+    }
+
+    function isValidGoldHolding(data) {
+      return data.id is number &&
+             data.metalType is string && data.metalType.size() <= 20 &&
+             data.weightGrams is number &&
+             data.buyPricePerGram is number &&
+             (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('purchaseDateMillis' in data) || data.purchaseDateMillis is number) &&
+             (!('karat' in data) || data.karat is number) &&
+             (!('purityLabel' in data) || (data.purityLabel is string && data.purityLabel.size() <= 50)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             (!('deductedFromCash' in data) || data.deductedFromCash is bool) &&
+             (!('isSold' in data) || data.isSold is bool) &&
+             (!('soldPriceUsd' in data) || data.soldPriceUsd is number) &&
+             (!('soldDateMillis' in data) || data.soldDateMillis is number);
+    }
+
+    function isValidDebtCredit(data) {
+      return data.id is number &&
+             data.type is string && data.type.size() <= 20 &&
+             data.personName is string && data.personName.size() > 0 && data.personName.size() <= 200 &&
+             data.totalAmount is number &&
+             (!('contactInfo' in data) || (data.contactInfo is string && data.contactInfo.size() <= 200)) &&
+             (!('amountPaid' in data) || data.amountPaid is number) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('dueDateMillis' in data) || data.dueDateMillis is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             (!('reminderEnabled' in data) || data.reminderEnabled is bool) &&
+             (!('reminderDaysBefore' in data) || data.reminderDaysBefore is number) &&
+             (!('isCompleted' in data) || data.isCompleted is bool) &&
+             (!('affectCashBalance' in data) || data.affectCashBalance is bool) &&
+             (!('createdAtMillis' in data) || data.createdAtMillis is number) &&
+             (!('exchangeRateAtEntry' in data) || data.exchangeRateAtEntry is number) &&
+             (!('cashImpactAmount' in data) || data.cashImpactAmount is number) &&
+             (!('cashPaidImpactAmount' in data) || data.cashPaidImpactAmount is number);
+    }
+
+    function isValidDebtPayment(data) {
+      return data.id is number &&
+             data.debtId is number &&
+             data.amount is number &&
+             (!('dateMillis' in data) || data.dateMillis is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+             (!('exchangeRateAtEntry' in data) || data.exchangeRateAtEntry is number) &&
+             (!('affectCashBalance' in data) || data.affectCashBalance is bool);
+    }
+
+    function isValidBudget(data) {
+      return data.id is number &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 100 &&
+             data.monthlyLimit is number &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('alertThresholdPercent' in data) || data.alertThresholdPercent is number) &&
+             (!('isRecurring' in data) || data.isRecurring is bool);
+    }
+
+    function isValidCarService(data) {
+      return data.id is number &&
+             data.carName is string && data.carName.size() > 0 && data.carName.size() <= 200 &&
+             data.cost is number &&
+             (!('carInvestmentId' in data) || data.carInvestmentId is number) &&
+             (!('serviceType' in data) || (data.serviceType is string && data.serviceType.size() <= 100)) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('paidBy' in data) || (data.paidBy is string && data.paidBy.size() <= 50)) &&
+             (!('partnerName' in data) || (data.partnerName is string && data.partnerName.size() <= 200)) &&
+             (!('dateMillis' in data) || data.dateMillis is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000));
+    }
+
+    function isValidCarPayment(data) {
+      return data.id is number &&
+             data.carName is string && data.carName.size() > 0 && data.carName.size() <= 200 &&
+             data.amount is number &&
+             (!('carId' in data) || data.carId is number) &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() <= 10)) &&
+             (!('paymentDateMillis' in data) || data.paymentDateMillis is number) &&
+             (!('paymentMonth' in data) || (data.paymentMonth is string && data.paymentMonth.size() <= 50)) &&
+             (!('paidBy' in data) || (data.paidBy is string && data.paidBy.size() <= 50)) &&
+             (!('partnerName' in data) || (data.partnerName is string && data.partnerName.size() <= 200)) &&
+             (!('myShare' in data) || data.myShare is number) &&
+             (!('partnerShare' in data) || data.partnerShare is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000));
+    }
+
+    function isValidUserSettings(data) {
+      return data.id is number &&
+             (!('startingCapital' in data) || data.startingCapital is number) &&
+             (!('capitalCurrency' in data) || (data.capitalCurrency is string && data.capitalCurrency.size() <= 10)) &&
+             (!('displayCurrency' in data) || (data.displayCurrency is string && data.displayCurrency.size() <= 10)) &&
+             (!('iqdPerUsdRate' in data) || data.iqdPerUsdRate is number) &&
+             (!('isCustomIqdRate' in data) || data.isCustomIqdRate is bool) &&
+             (!('eurPerUsdRate' in data) || data.eurPerUsdRate is number) &&
+             (!('lastRateUpdateMillis' in data) || data.lastRateUpdateMillis is number) &&
+             (!('biometricEnabled' in data) || data.biometricEnabled is bool) &&
+             (!('themeMode' in data) || (data.themeMode is string && data.themeMode.size() <= 20)) &&
+             (!('language' in data) || (data.language is string && data.language.size() <= 20)) &&
+             (!('lastCloudBackupMillis' in data) || data.lastCloudBackupMillis is number) &&
+             (!('cloudDeviceId' in data) || (data.cloudDeviceId is string && data.cloudDeviceId.size() <= 200)) &&
+             (!('capitalExchangeRateAtEntry' in data) || data.capitalExchangeRateAtEntry is number);
+    }
+
+    // Collection: Users and Subcollections
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == request.auth.uid;
+      allow update: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == existing().uid;
+      allow delete: if isOwner(userId);
+
+      // Subcollection: transactions
+      match /transactions/{transactionId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidTransaction(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: investments
+      match /investments/{investmentId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidInvestment(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: monthly_records
+      match /monthly_records/{recordId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidMonthlyRecord(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: gold_holdings
+      match /gold_holdings/{holdingId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidGoldHolding(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: debts_credits
+      match /debts_credits/{debtCreditId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidDebtCredit(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: debt_payments
+      match /debt_payments/{paymentId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidDebtPayment(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: budgets
+      match /budgets/{budgetId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidBudget(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: car_services
+      match /car_services/{serviceId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidCarService(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: car_payments
+      match /car_payments/{paymentId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidCarPayment(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: settings
+      match /settings/{settingId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidUserSettings(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
